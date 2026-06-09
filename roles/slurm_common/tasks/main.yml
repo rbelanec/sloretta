@@ -1,0 +1,73 @@
+---
+- name: Install Slurm client tools and base plugins
+  apt:
+    name:
+      - slurm-client
+      - slurm-wlm-basic-plugins
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create /etc/slurm directory
+  file:
+    path: /etc/slurm
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: "0755"
+
+- name: Create Slurm runtime directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: /var/spool/slurm,    mode: "0755" }
+    - { path: /var/log/slurm,      mode: "0755" }
+
+# systemd-tmpfiles owns /run/slurm; ensure the config exists so it survives reboots.
+- name: Create tmpfiles.d entry for /run/slurm
+  copy:
+    content: "d /run/slurm 0755 slurm slurm -\n"
+    dest: /etc/tmpfiles.d/slurm.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create /run/slurm now (tmpfiles)
+  command: systemd-tmpfiles --create /etc/tmpfiles.d/slurm.conf
+  changed_when: false
+
+# ── Config files — identical on every node ──────────────────────────────────
+# Any change to slurm.conf/cgroup.conf/gres.conf notifies the "slurm config
+# changed" listen topic; slurm_controller and slurm_compute each have a
+# handler subscribed to that topic.
+
+- name: Deploy slurm.conf
+  template:
+    src: slurm.conf.j2
+    dest: /etc/slurm/slurm.conf
+    owner: slurm
+    group: slurm
+    mode: "0644"
+  notify: slurm config changed
+
+- name: Deploy cgroup.conf
+  template:
+    src: cgroup.conf.j2
+    dest: /etc/slurm/cgroup.conf
+    owner: slurm
+    group: slurm
+    mode: "0644"
+  notify: slurm config changed
+
+- name: Deploy gres.conf
+  template:
+    src: gres.conf.j2
+    dest: /etc/slurm/gres.conf
+    owner: slurm
+    group: slurm
+    mode: "0644"
+  notify: slurm config changed

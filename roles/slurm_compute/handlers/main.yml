@@ -1,0 +1,8 @@
+---
+# Subscribed to the "slurm config changed" topic emitted by slurm_common.
+# Runs only on compute nodes (the only nodes where this role is applied).
+- name: restart slurmd
+  systemd:
+    name: slurmd
+    state: restarted
+  listen: slurm config changed

@@ -1,0 +1,32 @@
+---
+- name: Install NFS client utilities
+  apt:
+    name: nfs-common
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create NFS mount points
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ nfs_export_home }}"
+    - "{{ nfs_export_shared }}"
+
+- name: Mount /home from login node
+  ansible.posix.mount:
+    path: "{{ nfs_export_home }}"
+    src: "{{ hostvars[groups['login'][0]].slurm_private_ip }}:{{ nfs_export_home }}"
+    fstype: nfs
+    opts: "rw,hard,intr,timeo=30,retrans=3,_netdev"
+    state: mounted
+
+- name: Mount /opt/shared from login node
+  ansible.posix.mount:
+    path: "{{ nfs_export_shared }}"
+    src: "{{ hostvars[groups['login'][0]].slurm_private_ip }}:{{ nfs_export_shared }}"
+    fstype: nfs
+    opts: "rw,hard,intr,timeo=30,retrans=3,_netdev"
+    state: mounted

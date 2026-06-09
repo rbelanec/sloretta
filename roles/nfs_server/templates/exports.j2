@@ -1,0 +1,3 @@
+# /etc/exports — managed by Ansible; do not edit manually.
+{{ nfs_export_home }}     {{ nfs_subnet }}(rw,sync,no_subtree_check,no_root_squash)
+{{ nfs_export_shared }}   {{ nfs_subnet }}(rw,sync,no_subtree_check,no_root_squash)

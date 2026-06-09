@@ -1,0 +1,36 @@
+---
+# Preliminary play: gather facts from all nodes so hostvars is fully populated
+# when slurm.conf is rendered on the login node.
+- name: Gather facts for all cluster nodes
+  hosts: all
+  gather_facts: true
+  become: false
+
+# ── Login node ─────────────────────────────────────────────────────────────
+- name: Configure login node (slurmctld, slurmdbd, MariaDB, NFS server, munge)
+  hosts: login
+  gather_facts: false
+  become: true
+  vars_files:
+    - vault/secrets.yml
+  roles:
+    - common
+    - munge
+    - nfs_server
+    - slurm_common
+    - slurm_controller
+
+# ── Compute / GPU nodes ────────────────────────────────────────────────────
+- name: Configure compute nodes (slurmd, NVIDIA driver, NFS client, munge)
+  hosts: compute
+  gather_facts: false
+  become: true
+  vars_files:
+    - vault/secrets.yml
+  roles:
+    - common
+    - munge
+    - nfs_client
+    - nvidia
+    - slurm_common
+    - slurm_compute

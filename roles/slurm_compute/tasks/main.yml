@@ -1,0 +1,21 @@
+---
+- name: Install slurmd
+  apt:
+    name: slurmd
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create slurmd spool directory
+  file:
+    path: /var/spool/slurmd
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: "0755"
+
+- name: Enable and start slurmd
+  systemd:
+    name: slurmd
+    enabled: true
+    state: started

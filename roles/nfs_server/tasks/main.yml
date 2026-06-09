@@ -1,0 +1,31 @@
+---
+- name: Install NFS server
+  apt:
+    name: nfs-kernel-server
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# /home already exists on the login node; only create /opt/shared.
+- name: Create /opt/shared directory
+  file:
+    path: "{{ nfs_export_shared }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Configure NFS exports
+  template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: re-export nfs
+
+- name: Enable and start nfs-kernel-server
+  systemd:
+    name: nfs-kernel-server
+    enabled: true
+    state: started

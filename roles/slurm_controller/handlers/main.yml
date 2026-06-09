@@ -1,0 +1,16 @@
+---
+# Subscribed to the "slurm config changed" topic emitted by slurm_common.
+# Runs only on the login/controller node (the only node where this role is applied).
+- name: scontrol reconfigure
+  command: scontrol reconfigure
+  listen: slurm config changed
+
+- name: restart slurmctld
+  systemd:
+    name: slurmctld
+    state: restarted
+
+- name: restart slurmdbd
+  systemd:
+    name: slurmdbd
+    state: restarted

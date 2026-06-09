@@ -1,0 +1,87 @@
+---
+- name: Install slurmctld
+  apt:
+    name: slurmctld
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create slurmctld state-save directory
+  file:
+    path: /var/spool/slurmctld
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: "0700"
+
+- name: Enable and start slurmctld
+  systemd:
+    name: slurmctld
+    enabled: true
+    state: started
+
+# ── Accounting: MariaDB + slurmdbd ──────────────────────────────────────────
+- name: Accounting setup
+  when: slurm_accounting | bool
+  block:
+    - name: Install MariaDB, slurmdbd, and Python MySQL driver
+      apt:
+        name:
+          - mariadb-server
+          - python3-pymysql
+          - slurmdbd
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Ensure MariaDB is running
+      systemd:
+        name: mariadb
+        enabled: true
+        state: started
+
+    - name: Create Slurm accounting database
+      community.mysql.mysql_db:
+        name: "{{ slurm_db_name }}"
+        state: present
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+    - name: Create Slurm DB user with full access to accounting DB
+      community.mysql.mysql_user:
+        name: "{{ slurm_db_user }}"
+        password: "{{ slurm_db_password }}"
+        priv: "{{ slurm_db_name }}.*:ALL"
+        host: localhost
+        state: present
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+    - name: Deploy slurmdbd.conf
+      template:
+        src: slurmdbd.conf.j2
+        dest: /etc/slurm/slurmdbd.conf
+        owner: slurm
+        group: slurm
+        mode: "0600"
+      notify: restart slurmdbd
+
+    - name: Enable and start slurmdbd
+      systemd:
+        name: slurmdbd
+        enabled: true
+        state: started
+
+    - name: Wait for slurmdbd to accept connections on port 6819
+      wait_for:
+        host: 127.0.0.1
+        port: 6819
+        timeout: 30
+
+    - name: Check if cluster already registered in accounting
+      command: "sacctmgr -n show cluster {{ slurm_cluster_name }}"
+      register: cluster_check
+      changed_when: false
+      failed_when: false
+
+    - name: Register cluster with sacctmgr (idempotent)
+      command: "sacctmgr -i add cluster {{ slurm_cluster_name }}"
+      when: cluster_check.stdout | trim == ""

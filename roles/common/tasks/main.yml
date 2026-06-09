@@ -1,0 +1,45 @@
+---
+- name: Install base packages
+  apt:
+    name:
+      - chrony
+      - curl
+      - wget
+      - vim
+      - htop
+      - rsync
+      - zsh
+      - tmux
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Enable and start chrony (NTP — required for munge clock-skew tolerance)
+  systemd:
+    name: chrony
+    enabled: true
+    state: started
+
+- name: Set hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Render /etc/hosts for the whole cluster
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: "0644"
+
+# Create cluster users with pinned UIDs so NFS-mounted home dirs work correctly.
+- name: Create cluster users with fixed UIDs
+  user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    shell: /bin/bash
+    create_home: true
+    state: present
+  loop: "{{ cluster_users }}"
+  loop_control:
+    label: "{{ item.name }} (uid={{ item.uid }})"

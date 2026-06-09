@@ -1,0 +1,3 @@
+---
+# Login node is reached directly via its floating IP.
+# No special SSH proxy args are needed here.
