@@ -2,7 +2,7 @@
 - name: Install kernel headers and build tools (needed by DKMS)
   apt:
     name:
-      - "linux-headers-{{ ansible_kernel }}"
+      - "linux-headers-{{ ansible_facts['kernel'] }}"
       - gcc
       - make
       - dkms
