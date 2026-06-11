@@ -5,12 +5,4 @@
 # Ansible reaches compute nodes by ProxyJumping through the login node's
 # floating IP.  This variable is evaluated at connection time when hostvars
 # is fully populated.
-ansible_ssh_common_args: >-
-  -o ProxyJump=ubuntu@{{ hostvars[groups['login'][0]].ansible_host }}
-  -o StrictHostKeyChecking=no
-
-# ── Control == login node ────────────────────────────────────────────────────
-# When running Ansible directly on the login node, compute nodes are reachable
-# on the private network without a proxy.  Comment out ansible_ssh_common_args
-# above and uncomment the line below instead:
-# ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
