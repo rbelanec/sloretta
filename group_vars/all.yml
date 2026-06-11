@@ -32,3 +32,5 @@ cluster_users:
     uid: 2001
   - name: bob
     uid: 2002
+  - name: robert
+    uid: 2003
