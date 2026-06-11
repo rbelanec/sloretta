@@ -4,6 +4,4 @@
 # UIDs are assigned automatically by Linux. All nodes must be provisioned
 # together to ensure consistent UIDs for NFS home directory ownership.
 cluster_users:
-  - alice
-  - bob
   - robert
