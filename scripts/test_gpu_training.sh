@@ -7,13 +7,14 @@
 #SBATCH --mem=16G
 #SBATCH --gres=gpu:h200:1
 #SBATCH --time=00:10:00
-#SBATCH --output=%u/gpu-training-test-%j.out
-#SBATCH --error=%u/gpu-training-test-%j.err
+#SBATCH --output=/home/%u/gpu-training-test-%j.out
+#SBATCH --error=/home/%u/gpu-training-test-%j.err
 
 set -euo pipefail
 
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
+export PYENV_ROOT="/home/$(whoami)/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH"
+eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 pyenv activate ml
 
