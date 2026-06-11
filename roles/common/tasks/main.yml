@@ -1,4 +1,9 @@
 ---
+- name: Update apt cache and upgrade all packages
+  apt:
+    update_cache: true
+    upgrade: dist
+
 - name: Install base packages
   apt:
     name:
