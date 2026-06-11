@@ -22,7 +22,7 @@ nvidia_reboot_after_install: true
 nfs_export_home:   "/home"
 nfs_export_shared: "/opt/shared"
 # Restrict exports to the cluster's private subnet.
-nfs_subnet: "192.168.1.0/24"
+nfs_subnet: "192.168.2.0/24"
 
 # ── Cluster OS users with pinned UIDs ──────────────────────────────────────
 # UIDs must be identical on every node so NFS-mounted home dirs work.
