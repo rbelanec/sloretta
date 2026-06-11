@@ -41,13 +41,13 @@
         state: started
 
     - name: Create Slurm accounting database
-      community.mysql.mysql_db:
+      ansible.mysql.mysql_db:
         name: "{{ slurm_db_name }}"
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 
     - name: Create Slurm DB user with full access to accounting DB
-      community.mysql.mysql_user:
+      ansible.mysql.mysql_user:
         name: "{{ slurm_db_user }}"
         password: "{{ slurm_db_password }}"
         priv: "{{ slurm_db_name }}.*:ALL"
