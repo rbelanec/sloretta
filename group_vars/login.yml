@@ -1,3 +1,4 @@
 ---
 # Login node is reached directly via its floating IP.
 # No special SSH proxy args are needed here.
+ansible_python_interpreter: /usr/bin/python3
