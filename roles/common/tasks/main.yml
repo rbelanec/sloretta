@@ -37,14 +37,10 @@
     group: root
     mode: "0644"
 
-# Create cluster users with pinned UIDs so NFS-mounted home dirs work correctly.
-- name: Create cluster users with fixed UIDs
+- name: Create cluster users
   user:
-    name: "{{ item.name }}"
-    uid: "{{ item.uid }}"
+    name: "{{ item }}"
     shell: /bin/bash
     create_home: true
     state: present
   loop: "{{ cluster_users }}"
-  loop_control:
-    label: "{{ item.name }} (uid={{ item.uid }})"

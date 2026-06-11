@@ -23,14 +23,3 @@ nfs_export_home:   "/home"
 nfs_export_shared: "/opt/shared"
 # Restrict exports to the cluster's private subnet.
 nfs_subnet: "192.168.2.0/24"
-
-# ── Cluster OS users with pinned UIDs ──────────────────────────────────────
-# UIDs must be identical on every node so NFS-mounted home dirs work.
-# Add entries here; re-run the playbook to provision new users everywhere.
-cluster_users:
-  - name: alice
-    uid: 2001
-  - name: bob
-    uid: 2002
-  - name: robert
-    uid: 2003
