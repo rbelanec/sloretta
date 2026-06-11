@@ -54,8 +54,8 @@ JobAcctGatherType=jobacct_gather/none
 # RealMemory defaults to 95 % of ansible_memtotal_mb to leave headroom for OS.
 # Both can be overridden per-host with slurm_node_cpus / slurm_node_memory.
 {% for node in groups['compute'] %}
-{% set cpus = hostvars[node].slurm_node_cpus | default(hostvars[node].ansible_processor_vcpus | default(1)) | int %}
-{% set mem_total = hostvars[node].ansible_memtotal_mb | default(0) | int %}
+{% set cpus = hostvars[node].slurm_node_cpus | default(hostvars[node].ansible_facts['processor_vcpus'] | default(1)) | int %}
+{% set mem_total = hostvars[node].ansible_facts['memtotal_mb'] | default(0) | int %}
 {% set mem = hostvars[node].slurm_node_memory | default((mem_total * 0.95) | round | int) | int %}
 NodeName={{ node }} CPUs={{ cpus }} RealMemory={{ mem }} Gres=gpu:{{ hostvars[node].slurm_gpu_type }}:{{ hostvars[node].slurm_gpu_count }} State=UNKNOWN
 {% endfor %}
