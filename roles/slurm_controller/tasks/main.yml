@@ -85,3 +85,25 @@
     - name: Register cluster with sacctmgr (idempotent)
       command: "sacctmgr -i add cluster {{ slurm_cluster_name }}"
       when: cluster_check.stdout | trim == ""
+
+    - name: Check existing Slurm accounts
+      command: sacctmgr -n show account format=account
+      register: slurm_accounts
+      changed_when: false
+      failed_when: false
+
+    - name: Create Slurm account per user
+      command: "sacctmgr -i add account {{ item }} description='{{ item }}' organization='cluster'"
+      when: item not in slurm_accounts.stdout
+      loop: "{{ cluster_users }}"
+
+    - name: Check existing Slurm users
+      command: sacctmgr -n show user format=user
+      register: slurm_users
+      changed_when: false
+      failed_when: false
+
+    - name: Add Slurm user with account
+      command: "sacctmgr -i add user {{ item }} account={{ item }} defaultaccount={{ item }}"
+      when: item not in slurm_users.stdout
+      loop: "{{ cluster_users }}"
